@@ -30,7 +30,7 @@ try:
     model = get_peft_model(base_model, lora_config)
     model = nn.DataParallel(model)
 
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
     model.eval()
 
 except Exception as e:
@@ -46,10 +46,13 @@ class InputData(BaseModel):
 def predict(input_data: InputData):
 
     img_array = np.array(input_data.image, dtype=np.float32)
-    img_tensor = torch.tensor(img_array).unsqueeze(0)
+    image_tensor = torch.tensor(img_array)
+
+    if image_tensor.ndim == 3:
+        image_tensor = image_tensor.unsqueeze(0)
 
     with torch.no_grad():
-        outputs = model(img_tensor)
+        outputs = model(image_tensor)
         predictions = torch.argmax(outputs.logits, dim=-1)
 
     return {"prediction": int(predictions.item())}
