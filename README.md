@@ -1,39 +1,97 @@
-# Animal Recognition in the Wild: iWildCam2020 Dataset
+# Animal Recognition Using iWildCam2020 Dataset
 
-## About the Project
+This project focuses on the recognition of wild animals captured by camera traps using the iWildCam2020 dataset. It evaluates and implements advanced deep learning models, preprocessing techniques, and data augmentation to address challenges such as class imbalance, variability in lighting, and environmental conditions.
 
-The **iWildCam2020** dataset presents a unique challenge for animal recognition in the wild, with images captured by automatic cameras deployed in various climatic zones. These cameras document animals under diverse conditions, such as different times of day, varying weather, and across different seasons, which leads to a highly diverse and challenging dataset.
+---
 
-The project aims to develop a deep learning model that can accurately identify and classify animals from these images, despite the following challenges:
-- **Significant class imbalance** with 216 animal classes.
-- **Varying photo conditions**, such as lighting, weather, and time of day.
+## Table of Contents
 
-## Workflow
+1. [Introduction](#introduction)
+2. [Dataset](#dataset)
+3. [Methodology](#methodology)
+4. [Models Evaluated](#models-evaluated)
+5. [Results and Observations](#results-and-observations)
+6. [Conclusion](#conclusion)
+7. [Authors](#authors)
+8. [References](#references)
 
-The project follows a structured workflow as outlined in the notebook **swin-lora-training.ipynb**, which includes the following stages:
+---
 
-### 1. **Preprocessing the Dataset**
-   - Handling the class imbalance.
-   - Augmenting data to account for varying photo conditions.
-   - Preparing the images for model training.
+## Introduction
 
-### 2. **Experimentation with Different Models**
-   - **EfficientNet B6**: Used for transfer learning to leverage its ability to scale with different input sizes.
-   - **YOLOv11**: Applied for real-time object detection, focusing on accuracy and speed.
-   - **SWIN Transformer with LoRA**: A state-of-the-art transformer model that has shown promise in visual tasks, optimized for efficiency with low-rank adaptation (LoRA).
+Recognizing wild animals in camera trap images plays a crucial role in biodiversity monitoring, wildlife conservation, and ecosystem management. However, real-world challenges like poor image quality, occlusions, and class imbalance necessitate robust machine learning solutions. This project explores state-of-the-art architectures for tackling these challenges.
 
-### 3. **Fine-tuning the Best Model**
-   - The model with the best initial performance is fine-tuned for higher accuracy and efficiency.
-   - Optimizing hyperparameters and training strategies to handle the long training times and stability issues inherent in such a complex dataset.
+---
 
-### 4. **Evaluating Model Performance**
-   - Assessing the model's performance using relevant metrics (accuracy, precision, recall, etc.).
-   - Evaluating the model under different conditions, including class imbalances, weather, and lighting changes.
+## Dataset
 
-### 5. **Deployment**
-   - Preparing the final model for deployment in real-world scenarios.
-   - Ensuring the model is robust and can handle new, unseen images of animals in various conditions.
+### iWildCam2020
+The iWildCam2020 dataset contains camera trap images of wild animals captured across various geographic locations, climates, and seasons.
+
+**Key Challenges:**
+- Lighting variability (day/night images)
+- Black borders with date and time stamps
+- Motion blur, occlusions, and inconsistent resolutions
+- Significant class imbalance across 216 animal species
+
+---
+
+## Methodology
+
+### Preprocessing Techniques
+1. **Day/Night Time Splitting**: Classifies images into daytime and nighttime based on timestamps for better lighting-specific processing.
+2. **Dark Image Enhancement**: Uses histogram equalization to improve the visibility of nighttime images.
+3. **Black Line Cropping**: Removes black borders or time/date stamps from images.
+
+### Evaluation Metrics
+- **F1 Score**
+- **Precision**
+- **Recall**
+
+These metrics are prioritized over traditional accuracy to reflect model performance on underrepresented classes better.
+
+---
+
+## Models Evaluated
+
+1. **EfficientNet B6**  
+   - It is highly efficient with fewer parameters and strong classification performance.
+   - Robust on high-resolution images but prone to overfitting with small datasets.
+
+2. **YOLOv11 with Classification Head**  
+   - Real-time performance optimized for object detection.
+   - Challenges: Small object detection and class imbalance reduce classification accuracy.
+
+3. **SWIN Transformer with LoRA**  
+   - Vision Transformer-based model for high-resolution images.
+   - Incorporates Low-Rank Adaptation (LoRA) to reduce hardware demands.
+   - Prone to overfitting on small datasets and computationally intensive.
+
+---
+
+## Results and Observations
+
+- **EfficientNet B6** emerged as the most balanced model, achieving strong performance when trained on a larger dataset (20,000 images).
+- **YOLOv11** exhibited instability due to class imbalance and task mismatch.
+- **SWIN Transformer with LoRA** showed promising results but required substantial computational resources and struggled with smaller datasets.
+
+### Improvements
+- Increasing the dataset size significantly improved generalization for all models.
+- Hard-negative sampling helped balance metrics for underrepresented classes.
+
+---
 
 ## Conclusion
-The project aims to achieve high accuracy in classifying animals from diverse and challenging environments, and to develop a stable and efficient model that can be deployed in practical wildlife monitoring systems.
+
+EfficientNet B6 was chosen as the optimal model for this task due to its:
+- Strong performance across multiple metrics.
+- Efficiency with high-resolution images.
+- Balanced trade-off between accuracy, recall, and precision.
+
+**Future Work**:
+- Advanced data augmentation techniques.
+- Enhanced strategies for addressing class imbalance.
+- Exploring additional lightweight transformer architectures.
+
+
 
