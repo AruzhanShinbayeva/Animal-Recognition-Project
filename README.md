@@ -34,6 +34,19 @@ python inference.py best-effnet-27102024.pt animal_image.jpeg
 
 ---
 
+### Run usin Docker
+
+Download model from [google-drive model list](https://drive.google.com/drive/folders/1RFIkFalMzkhecT6ncRpkWzSaCHTgLrlr?usp=sharing) and place it to the project-folder/models and name model.pt.
+
+Run inference following:
+
+```cmd
+docker-compose -f code/deploy/docker-compose.yml  up --build
+```
+Now you can access web version for inference at http://localhost:8501
+
+---
+
 ## Table of Contents
 
 1. [Introduction](#introduction)
