@@ -1,50 +1,53 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
 import numpy as np
-from peft import get_peft_model, LoraConfig
-import os
 import torch
 import torch.nn as nn
-from torchvision import transforms
+from fastapi import FastAPI
+from pydantic import BaseModel
+from torchvision import models
 
-model_path = os.path.join('/app/models', 'model.pt')
 
 def create_model():
-    from transformers import AutoModelForImageClassification
-    model = AutoModelForImageClassification.from_pretrained(
-        "microsoft/swinv2-tiny-patch4-window16-256"
-    )
+    device = "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+    try:
+        if torch.backends.mps.is_available():
+            device = "mps"
+    except Exception:
+        pass
+
+    model_name = "efficientnet_b6"
+    model = getattr(models, model_name)(weights=None).to(device)
+
     num_classes = 216
-    model.classifier = nn.Linear(768, num_classes)
+    model.classifier = nn.Linear(2304, num_classes)
+    state_dict = torch.load("/app/models/model.pt", map_location=device)
+
+    filtered_state_dict = {
+        k: v for k, v in state_dict.items() if k in model.state_dict()
+    }
+
+    model.load_state_dict(filtered_state_dict, strict=False)
+
+    model.eval()
     return model
 
+
 try:
-    base_model = create_model()
-    lora_config = LoraConfig(
-        r=8,
-        lora_alpha=32,
-        lora_dropout=0.15,
-        target_modules=["query", "value", "key"],
-        modules_to_save=["classifier"],
-    )
-    model = get_peft_model(base_model, lora_config)
-    model = nn.DataParallel(model)
-
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
-    model.eval()
-
+    model = create_model()
 except Exception as e:
     print(f"Error loading model: {e}")
     model = None
 
 app = FastAPI()
 
+
 class InputData(BaseModel):
     image: list
 
+
 @app.post("/predict")
 def predict(input_data: InputData):
-
     img_array = np.array(input_data.image, dtype=np.float32)
     image_tensor = torch.tensor(img_array)
 
@@ -53,6 +56,6 @@ def predict(input_data: InputData):
 
     with torch.no_grad():
         outputs = model(image_tensor)
-        predictions = torch.argmax(outputs.logits, dim=-1)
+        predictions = torch.argmax(outputs, dim=-1)
 
     return {"prediction": int(predictions.item())}
